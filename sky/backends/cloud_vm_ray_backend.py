@@ -3159,8 +3159,15 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
                     # Do not remove the stopped cluster from the global state
                     # if failed to start.
                     if not e.no_failover:
+                        global_user_state.add_cluster_event(
+                            cluster_name,
+                            None,
+                            'Provision failed: ' + str(e),
+                            global_user_state.ClusterEventType.STATUS_CHANGE,
+                            nop_if_duplicate=True)
                         global_user_state.remove_cluster(cluster_name,
-                                                         terminate=True)
+                                                         terminate=True,
+                                                         remove_events=False)
                         usage_lib.messages.usage.update_final_cluster_status(
                             None)
                     logger.error(
@@ -4482,7 +4489,8 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
                            f'provision yaml so it '
                            'has not been provisioned. Skipped.')
             global_user_state.remove_cluster(handle.cluster_name,
-                                             terminate=terminate)
+                                             terminate=terminate,
+                                             remove_events=terminate)
             return
         log_path = os.path.join(os.path.expanduser(self.log_dir),
                                 'teardown.log')
@@ -4819,7 +4827,8 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
 
         if not terminate or remove_from_db:
             global_user_state.remove_cluster(handle.cluster_name,
-                                             terminate=terminate)
+                                             terminate=terminate,
+                                             remove_events=False)
 
     def remove_cluster_config(self, handle: CloudVmRayResourceHandle) -> None:
         """Remove the YAML config of a cluster."""
