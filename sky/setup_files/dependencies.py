@@ -56,7 +56,7 @@ install_requires = [
     'aiofiles',
     'httpx',
     'setproctitle',
-    'sqlalchemy',
+    'sqlalchemy >= 2.0',
     'psycopg2-binary',
     # TODO(hailong): These three dependencies should be removed after we make
     # the client-side actually not importing them.
